@@ -1,4 +1,8 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+
+import pandas_datareader.data as web
+import datetime
 
 code_df = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13', header=0)[0]
 
@@ -48,5 +52,27 @@ df['date'] = pd.to_datetime(df['date'])
 # 일자(date)를 기준으로 오름차순 정렬
 df = df.sort_values(by=['date'], ascending=True)
 
+new_df = df[df['volume'] != 0]
+ma3 = new_df['close'].rolling(3).mean()
+ma5 = new_df['close'].rolling(5).mean()
+ma8 = new_df['close'].rolling(8).mean()
+ma13 = new_df['close'].rolling(13).mean()
+
+new_df.insert(len(new_df.columns), "MA3", ma3)
+new_df.insert(len(new_df.columns), "MA5", ma5)
+new_df.insert(len(new_df.columns), "MA8", ma8)
+new_df.insert(len(new_df.columns), "MA13", ma13)
+
 # 상위 5개 데이터 확인
-print(df.head())
+print(new_df.tail(20))
+
+plt.plot(new_df.index, new_df['close'], label="Close")
+
+plt.plot(new_df.index, new_df['MA3'], label="MA3")
+plt.plot(new_df.index, new_df['MA5'], label="MA5")
+plt.plot(new_df.index, new_df['MA8'], label="MA8")
+plt.plot(new_df.index, new_df['MA13'], label="MA13")
+
+plt.legend(loc='best')
+plt.grid()
+plt.show()
